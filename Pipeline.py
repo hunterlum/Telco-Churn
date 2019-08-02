@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 
 # # Set Up
@@ -16,6 +16,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split, GridSearchCV
+from joblib import dump
 
 def obj_to_float(x):
     try:
@@ -146,37 +147,34 @@ lr_clf=Pipeline([
 params=[
     {
         'preprocessor__categorical__encoder':[OrdinalEncoder(),OneHotEncoder()],
-        'decomposition__n_components':list(np.linspace(0.5,1-1e-5,5)),
-        'classifier' : [LogisticRegression(solver='lbfgs',max_iter=1e5)],
+        'decomposition__n_components':list(np.linspace(0.5,1-1e-5,3)),
+        'classifier' : [LogisticRegression(solver='lbfgs',max_iter=1e3)],
         'classifier__penalty' : ['l1', 'l2'],
         'classifier__solver' : ['liblinear'],
-        'classifier__C': list(np.linspace(0.5,1-1e-5,5))
+        'classifier__C': list(np.linspace(0.5,1-1e-5,3))
     },
     {
         'preprocessor__categorical__encoder':[OrdinalEncoder(),OneHotEncoder()],
-        'decomposition__n_components':list(np.linspace(0.5,1-1e-5,5)),
+        'decomposition__n_components':list(np.linspace(0.5,1-1e-5,3)),
         'classifier' : [RandomForestClassifier()],
-        'classifier__n_estimators' : list(range(10,251,2)),
-        'classifier__max_features':["auto",'sqrt','log2',None]+list(np.linspace(0.1,1-1e-5,5))
+        'classifier__n_estimators' : list(range(10,501,20)),
+        'classifier__max_features':["auto",'sqrt','log2',None]+list(np.linspace(0.1,1-1e-5,3))
     }
 ]
 
-cv_num=3
-grid=GridSearchCV(lr_clf,params,cv=cv_num,n_jobs=-1,verbose=1)
+for i in range(2,4):
+    cv_num=i
+    grid=GridSearchCV(lr_clf,params,cv=cv_num,n_jobs=-1,verbose=1)
 
-grid.fit(feat_train,churn_train)
-print('Best: ')
-print('Train score: %0.5f' %grid.score(feat_train,churn_train))
-print('Test score: %0.5f' %grid.score(feat_test,churn_test))
-print()
-
+    grid.fit(feat_train,churn_train)
+    print('Best: ')
+    print('Train score: %0.5f' %grid.score(feat_train,churn_train))
+    print('Test score: %0.5f' %grid.score(feat_test,churn_test))
+    print()
+    dump(grid,'data/clf_cv'+str(cv_num)+'.joblib')
 
 # In[ ]:
-
-
-grid.best_params_
-
-
+#grid.best_params_
 # Source demonstrating how to combine features
 # 
 # https://scikit-learn.org/stable/auto_examples/compose/plot_column_transformer_mixed_types.html#sphx-glr-auto-examples-compose-plot-column-transformer-mixed-types-py
@@ -189,7 +187,5 @@ grid.best_params_
 # In[ ]:
 
 
-from joblib import dump
-dump(grid,'data/clf_cv'+str(cv_num)+'.joblib')
 print('Model saved! Goodbye.')
 
