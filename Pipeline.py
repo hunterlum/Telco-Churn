@@ -146,23 +146,23 @@ lr_clf=Pipeline([
 params=[
     {
         'preprocessor__categorical__encoder':[OrdinalEncoder(),OneHotEncoder()],
-        'decomposition__n_components':list(np.linspace(0.5,1-1e-5,10)),
+        'decomposition__n_components':list(np.linspace(0.5,1-1e-5,5)),
         'classifier' : [LogisticRegression(solver='lbfgs',max_iter=1e5)],
         'classifier__penalty' : ['l1', 'l2'],
         'classifier__solver' : ['liblinear'],
-        'classifier__C': list(np.linspace(0.5,1-1e-5,10))
+        'classifier__C': list(np.linspace(0.5,1-1e-5,5))
     },
     {
         'preprocessor__categorical__encoder':[OrdinalEncoder(),OneHotEncoder()],
-        'decomposition__n_components':list(np.linspace(0.5,1-1e-5,10)),
+        'decomposition__n_components':list(np.linspace(0.5,1-1e-5,5)),
         'classifier' : [RandomForestClassifier()],
-        'classifier__n_estimators' : list(range(10,251,5)),
-        'classifier__max_features':["auto",'sqrt','log2',None]+list(np.linspace(0.1,1-1e-5,10))
+        'classifier__n_estimators' : list(range(10,251,2)),
+        'classifier__max_features':["auto",'sqrt','log2',None]+list(np.linspace(0.1,1-1e-5,5))
     }
 ]
 
-
-grid=GridSearchCV(lr_clf,params,cv=4,n_jobs=2,verbose=1)
+cv_num=3
+grid=GridSearchCV(lr_clf,params,cv=cv_num,n_jobs=-1,verbose=1)
 
 grid.fit(feat_train,churn_train)
 print('Best: ')
@@ -190,6 +190,6 @@ grid.best_params_
 
 
 from joblib import dump
-dump(grid,'data/clf.joblib')
+dump(grid,'data/clf_cv'+str(cv_num)+'.joblib')
 print('Model saved! Goodbye.')
 
