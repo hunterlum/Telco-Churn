@@ -17,6 +17,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split, GridSearchCV
 from joblib import dump
+from tqdm import tqdm
 
 def obj_to_float(x):
     try:
@@ -162,7 +163,7 @@ params=[
     }
 ]
 
-for i in range(2,4):
+for i in tqdm(range(2,6)):
     cv_num=i
     grid=GridSearchCV(lr_clf,params,cv=cv_num,n_jobs=-1,verbose=1)
 
